@@ -148,6 +148,13 @@ namespace Util.Biz.Payments.Wechatpay.Results {
         }
 
         /// <summary>
+        /// 获取微信退款单号
+        /// </summary>
+        public string GetRefundId() {
+            return GetParam( "refund_id" );
+        }
+
+        /// <summary>
         /// 获取交易类型
         /// </summary>
         public string GetTradeType() {

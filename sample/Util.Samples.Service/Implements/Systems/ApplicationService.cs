@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Util.Applications;
 using Util.Datas.Sql;
 using Util.Domains.Repositories;
@@ -59,12 +60,24 @@ namespace Util.Samples.Service.Implements.Systems {
         }
 
         /// <summary>
+        /// 查询
+        /// </summary>
+        /// <param name="query">查询参数</param>
+        public override async Task<List<ApplicationDto>> QueryAsync( ApplicationQuery query ) {
+            return await SqlQuery
+                .Select<Application>( true )
+                .From<Application>( "a" )
+                .OrIfNotEmpty<Application>( t => t.Code.Contains( query.Keyword ), t => t.Name.Contains( query.Keyword ) )
+                .ToListAsync<ApplicationDto>();
+        }
+
+        /// <summary>
         /// 分页查询
         /// </summary>
         /// <param name="query">查询参数</param>
         public override async Task<PagerList<ApplicationDto>> PagerQueryAsync( ApplicationQuery query ) {
             return await SqlQuery
-                .Select<Application>( t => new object[] { t.Id, t.Code, t.Comment, t.Enabled, t.Name, t.RegisterEnabled, t.CreationTime }, true )
+                .Select<Application>( true )
                 .From<Application>( "a" )
                 .WhereIfNotEmpty<Application>( t => t.Code.Contains( query.Code ) )
                 .WhereIfNotEmpty<Application>( t => t.Name.Contains( query.Name ) )
