@@ -136,6 +136,10 @@
         /// </summary>
         public const string Url = "url";
         /// <summary>
+        /// 保存Url
+        /// </summary>
+        public const string SaveUrl = "save-url";
+        /// <summary>
         /// 数据源
         /// </summary>
         public const string DataSource = "datas-source";
@@ -207,6 +211,10 @@
         /// 标签
         /// </summary>
         public const string Label = "label";
+        /// <summary>
+        /// 标签文本
+        /// </summary>
+        public const string LabelText = "label-text";
         /// <summary>
         /// 位置
         /// </summary>
@@ -664,6 +672,10 @@
         /// </summary>
         public const string ShowLine = "show-line";
         /// <summary>
+        /// 显示标签
+        /// </summary>
+        public const string ShowLabel = "show-label";
+        /// <summary>
         /// 展开所有
         /// </summary>
         public const string ExpandAll = "expand-all";
@@ -811,5 +823,141 @@
         /// 方向
         /// </summary>
         public const string Orientation = "orientation";
+        /// <summary>
+        /// 跨度
+        /// </summary>
+        public const string Span = "span";
+        /// <summary>
+        /// 布局
+        /// </summary>
+        public const string Layout = "layout";
+        /// <summary>
+        /// 显示冒号
+        /// </summary>
+        public const string ShowColon = "show-colon";
+        /// <summary>
+        /// 标签for属性
+        /// </summary>
+        public const string LabelFor = "label-for";
+        /// <summary>
+        /// 间隔
+        /// </summary>
+        public const string Gutter = "gutter";
+        /// <summary>
+        /// 标签跨度
+        /// </summary>
+        public const string LabelSpan = "label-span";
+        /// <summary>
+        /// 控件跨度
+        /// </summary>
+        public const string ControlSpan = "control-span";
+        /// <summary>
+        /// 是否浮动
+        /// </summary>
+        public const string IsFlex = "is-flex";
+        /// <summary>
+        /// 水平排列
+        /// </summary>
+        public const string Justify = "justify";
+        /// <summary>
+        /// 消息
+        /// </summary>
+        public const string Message = "message";
+        /// <summary>
+        /// 操作
+        /// </summary>
+        public const string Actions = "actions";
+        /// <summary>
+        /// 复选框变更事件
+        /// </summary>
+        public const string OnCheckBoxChange = "on-check-box-change";
+        /// <summary>
+        /// 允许选择
+        /// </summary>
+        public const string Selectable = "selectable";
+        /// <summary>
+        /// 内联折叠
+        /// </summary>
+        public const string InlineCollapsed = "inline-collapsed";
+        /// <summary>
+        /// 内联缩进
+        /// </summary>
+        public const string InlineIndent = "inline-indent";
+        /// <summary>
+        /// 勾选的键列表
+        /// </summary>
+        public const string CheckedKeys = "checked-keys";
+        /// <summary>
+        /// 展开的键列表
+        /// </summary>
+        public const string ExpandedKeys = "expanded-keys";
+        /// <summary>
+        /// 选中的键列表
+        /// </summary>
+        public const string SelectedKeys = "selected-keys";
+        /// <summary>
+        /// 是否按钮
+        /// </summary>
+        public const string IsButton = "is-button";
+        /// <summary>
+        /// 自动完成
+        /// </summary>
+        public const string AutoComplete = "autocomplete";
+        /// <summary>
+        /// 选择索引变更事件
+        /// </summary>
+        public const string OnSelectedIndexChange = "on-selected-index-change";
+        /// <summary>
+        /// 延迟加载
+        /// </summary>
+        public const string Lazy = "lazy";
+        /// <summary>
+        /// 双击启动编辑
+        /// </summary>
+        public const string DoubleClickStartEdit = "double-click-start-edit";
+        /// <summary>
+        /// 是否编辑
+        /// </summary>
+        public const string IsEdit = "is-edit";
+        /// <summary>
+        /// 标签
+        /// </summary>
+        public const string Tags = "tags";
+        /// <summary>
+        /// 颜色类型
+        /// </summary>
+        public const string ColorType = "color-type";
+        /// <summary>
+        /// 关闭后事件
+        /// </summary>
+        public const string OnAfterClose = "on-after-close";
+        /// <summary>
+        /// 选中变更事件
+        /// </summary>
+        public const string OnCheckedChange = "on-checked-change";
+        /// <summary>
+        /// 按钮样式
+        /// </summary>
+        public const string ButtonStyle = "button-style";
+        /// <summary>
+        /// 表单项浮动
+        /// </summary>
+        public const string FormItemFlex = "form-item-flex";
+        /// <summary>
+        /// 拉
+        /// </summary>
+        public const string Pull = "pull";
+        /// <summary>
+        /// 推
+        /// </summary>
+        public const string Push = "push";
+        /// <summary>
+        /// 列跨度
+        /// </summary>
+        public const string ColumnSpan = "column-span";
+        /// <summary>
+        /// 自动创建列
+        /// </summary>
+        public const string AutoCreateColumn = "auto-create-column";
     }
 }

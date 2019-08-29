@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Util.Ui.Angular.Base;
 using Util.Ui.Angular.Forms.Configs;
+using Util.Ui.Enums;
 using Util.Ui.Renders;
 using Util.Ui.TagHelpers;
 using Util.Ui.Zorro.Forms.Renders;
@@ -17,6 +18,22 @@ namespace Util.Ui.Zorro.Forms {
         /// </summary>
         public ModelExpression For { get; set; }
         /// <summary>
+        /// 是否显示标签，默认值：false
+        /// </summary>
+        public bool ShowLabel { get; set; }
+        /// <summary>
+        /// 标签文本
+        /// </summary>
+        public string LabelText { get; set; }
+        /// <summary>
+        /// 标签的栅格占位格数
+        /// </summary>
+        public int LabelSpan { get; set; }
+        /// <summary>
+        /// 是否flex布局，默认值：false
+        /// </summary>
+        public bool IsFlex { get; set; }
+        /// <summary>
         /// [(ngModel)],模型绑定
         /// </summary>
         public string NgModel { get; set; }
@@ -28,6 +45,10 @@ namespace Util.Ui.Zorro.Forms {
         /// [nzName],控件的名称
         /// </summary>
         public string BindName { get; set; }
+        /// <summary>
+        /// 按钮样式
+        /// </summary>
+        public RadioButtonStyle ButtonStyle { get; set; }
         /// <summary>
         /// 是否垂直布局
         /// </summary>
@@ -52,6 +73,10 @@ namespace Util.Ui.Zorro.Forms {
         /// 必填项
         /// </summary>
         public string Required { get; set; }
+        /// <summary>
+        /// nzSpan,24栅格占位格数，可选值: 0 - 24, 为 0 时隐藏
+        /// </summary>
+        public int Span { get; set; }
         /// <summary>
         /// (ngModelChange),变更事件处理函数
         /// </summary>

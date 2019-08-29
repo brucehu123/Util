@@ -2,7 +2,7 @@
 //Copyright 2019 何镇汐
 //Licensed under the MIT license
 //================================================
-import { Injector, OnInit } from '@angular/core';
+import { Injector, Input, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { util, ViewModel } from '../index';
 import { FormComponentBase } from './form-component-base';
@@ -16,21 +16,34 @@ export abstract class EditComponentBase<TViewModel extends ViewModel> extends Fo
      */
     protected util = util;
     /**
-     * 视图模型
+     * 参数
      */
     model: TViewModel;
+    /**
+     * 是否创建
+     */
+    isNew: boolean;
+    /**
+     * 标识
+     */
+    @Input() id;
+    /**
+     * 数据
+     */
+    @Input() data;
 
     /**
      * 初始化组件
      * @param injector 注入器
      */
-    constructor(injector: Injector) {
-        super(injector);
+    constructor( injector: Injector ) {
+        super( injector );
+        this.isNew = true;
         this.model = this.createModel();
     }
 
     /**
-     * 创建视图模型
+     * 创建参数
      */
     protected createModel(): TViewModel {
         return <TViewModel>{};
@@ -47,16 +60,35 @@ export abstract class EditComponentBase<TViewModel extends ViewModel> extends Fo
      * 通过标识加载
      */
     protected loadById( id = null ) {
-        id = id || this.util.router.getParam("id");
-        if (!id)
+        if ( this.isRequestLoad() === false && this.data ) {
+            this.loadModel( this.data );
             return;
-        this.util.webapi.get<TViewModel>(this.getByIdUrl(id)).handle({
+        }
+        id = id || this.id || this.util.router.getParam( "id" );
+        if ( !id )
+            return;
+        this.util.webapi.get<TViewModel>( this.getByIdUrl( id ) ).handle( {
             ok: result => {
-                result = this.loadBefore( result );
-                this.model = result;
-                this.loadAfter(result);
+                this.loadModel( result );
             }
-        });
+        } );
+    }
+
+    /**
+     * 加载模型
+     */
+    private loadModel( data ) {
+        let result = this.loadBefore( data );
+        this.isNew = false;
+        this.model = result;
+        this.loadAfter( result );
+    }
+
+    /**
+     * 是否发送请求进行加载
+     */
+    protected isRequestLoad() {
+        return true;
     }
 
     /**
@@ -69,7 +101,7 @@ export abstract class EditComponentBase<TViewModel extends ViewModel> extends Fo
     /**
      * 加载完成后操作
      */
-    protected loadAfter(result) {
+    protected loadAfter( result ) {
     }
 
     /**
@@ -81,7 +113,7 @@ export abstract class EditComponentBase<TViewModel extends ViewModel> extends Fo
      * 获取单个实体地址
      * @param id 标识
      */
-    protected getByIdUrl(id) {
+    protected getByIdUrl( id ) {
         return `/api/${this.getBaseUrl()}/${id}`;
     }
 
@@ -90,19 +122,18 @@ export abstract class EditComponentBase<TViewModel extends ViewModel> extends Fo
      * @param form 表单
      * @param button 按钮
      */
-    submit(form?: NgForm, button?) {
-        this.util.form.submit({
+    submit( form?: NgForm, button?) {
+        this.util.form.submit( {
             url: this.getSubmitUrl(),
             data: this.model,
             form: form,
             button: button,
             back: true
-        });
+        } );
     }
 
     /**
      * 获取提交地址
-     * @param id 标识
      */
     protected getSubmitUrl() {
         return `/api/${this.getBaseUrl()}`;
@@ -113,5 +144,12 @@ export abstract class EditComponentBase<TViewModel extends ViewModel> extends Fo
      */
     back() {
         this.util.router.back();
+    }
+
+    /**
+     * 关闭弹出框
+     */
+    close() {
+        this.util.dialog.close();
     }
 }

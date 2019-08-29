@@ -4,7 +4,9 @@
 //=======================================================
 import { Component, Input, Output, OnInit, EventEmitter } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
-import { util, PagerList, IKey, QueryParameter } from "../index";
+import { Util as util } from "../util";
+import { QueryParameter, IKey } from "../core/model";
+import { PagerList } from "../core/pager-list";
 import { MessageConfig as config } from '../config/message-config';
 
 /**
@@ -81,6 +83,10 @@ export class Table<T extends IKey> implements OnInit {
      * 初始排序字段
      */
     @Input() sortKey: string;
+    /**
+     * 复选框选中的标识列表
+     */
+    @Input() checkedKeys: string | string[];
     /**
      * 查询参数变更事件
      */
@@ -166,7 +172,7 @@ export class Table<T extends IKey> implements OnInit {
             return;
         let param = options.param || this.queryParam;
         if ( options.pageIndex )
-            param.page = options.pageIndex; 
+            param.page = options.pageIndex;
         util.webapi.get<any>( url ).param( param ).button( options.button ).handle( {
             before: () => {
                 this.loading = true;
@@ -191,8 +197,7 @@ export class Table<T extends IKey> implements OnInit {
         this.dataSource = result.data || [];
         this.totalCount = result.totalCount;
         this.checkedSelection.clear();
-        if ( !result.totalCount )
-            this.showPagination = false;
+        this.checkIds( this.checkedKeys );
     }
 
     /**
@@ -241,20 +246,23 @@ export class Table<T extends IKey> implements OnInit {
      * 刷新
      * @param queryParam 查询参数
      * @param button 按钮
+     * @param handler 刷新成功回调函数
      */
-    refresh( queryParam, button?) {
+    refresh( queryParam, button?, handler?: ( result ) => void ) {
         this.queryParam = queryParam;
         this.queryParamChange.emit( queryParam );
         this.initPage();
         this.queryParam.order = this.sortKey;
+        this.checkedKeys = null;
         this.query( {
-            button: button
+            button: button,
+            handler: handler
         } );
     }
 
     /**
      * 批量删除被选中实体
-     * @param options 配置
+     * @param options 参数
      */
     delete( options?: {
         /**
@@ -296,20 +304,23 @@ export class Table<T extends IKey> implements OnInit {
         }
         util.webapi.post( url, ids ).button( button ).handle( {
             ok: () => {
-                if ( handler ) {
-                    handler();
-                    return;
-                }
                 util.message.success( config.deleteSuccessed );
                 this.query( {
                     handler: result => {
-                        if ( result.page <= 1 )
+                        if ( result.page <= 1 ) {
+                            handler && handler();
                             return;
+                        }
                         if ( result.page > result.pageCount ) {
                             this.query( {
-                                pageIndex: result.page - 1
+                                pageIndex: result.page - 1,
+                                handler: () => {
+                                    handler && handler();
+                                }
                             } );
+                            return;
                         }
+                        handler && handler();
                     }
                 } );
             }
@@ -324,10 +335,54 @@ export class Table<T extends IKey> implements OnInit {
     }
 
     /**
+     * 获取勾选的实体列表
+     */
+    getCheckedNodes(): T[] {
+        return this.getChecked();
+    }
+
+    /**
+     * 获取勾选的实体列表长度
+     */
+    getCheckedLength(): number {
+        return this.getChecked().length;
+    }
+
+    /**
      * 获取勾选的实体标识列表
      */
     getCheckedIds(): string {
         return this.getChecked().map( value => value.id ).join( "," );
+    }
+
+    /**
+     * 获取勾选的单个节点
+     */
+    getCheckedNode(): T {
+        let list = this.getChecked();
+        if ( !list || list.length === 0 )
+            return null;
+        return list[0];
+    }
+
+    /**
+     * 通过标识列表查找
+     * @param ids 标识列表
+     */
+    getByIds( ids: string[] ): T[] {
+        if ( !ids || ids.length === 0 )
+            return [];
+        return this.dataSource.filter( item => ids.some( id => id === item.id ) );
+    }
+
+    /**
+     * 通过标识查找
+     * @param id 标识
+     */
+    getById( id: string ): T {
+        if ( !id )
+            return null;
+        return this.dataSource.find( data => data.id === id );
     }
 
     /**
@@ -346,6 +401,32 @@ export class Table<T extends IKey> implements OnInit {
     }
 
     /**
+     * 切换勾选状态
+     */
+    toggleRow(row) {
+        this.checkedSelection.toggle(row);
+    }
+
+    /**
+     * 勾选标识列表
+     */
+    checkIds( ids ) {
+        if ( !ids )
+            return;
+        if ( !ids.some ) {
+            let item = this.dataSource.find( data => data.id === ids );
+            this.checkedSelection.select( item );
+            return;
+        }
+        let list = this.dataSource.filter( data => ids.indexOf( data.id ) > -1 );
+        list.forEach( item => {
+            if ( this.checkedSelection.isSelected( item ) )
+                return;
+            this.checkedSelection.select( item );
+        } );
+    }
+
+    /**
      * 清空勾选的行
      */
     clearChecked() {
@@ -360,6 +441,7 @@ export class Table<T extends IKey> implements OnInit {
         this.queryParam.page = 1;
         this.totalCount = 0;
         this.checkedSelection.clear();
+        this.checkedKeys = null;
     }
 
     /**
@@ -432,5 +514,46 @@ export class Table<T extends IKey> implements OnInit {
      */
     isMasterIndeterminate() {
         return this.checkedSelection.hasValue() && ( !this.isAllChecked() || !this.dataSource.length );
+    }
+
+    /**
+     * 添加行
+     * @param row 行
+     */
+    addRow( row ) {
+        if ( !row )
+            return;
+        if ( this.dataSource.some( t => t.id === row.id ) )
+            return;
+        this.dataSource = [row, ...this.dataSource];
+        this.totalCount = this.totalCount + 1;
+        this.initLineNumbers( this.dataSource );
+    }
+
+    /**
+     * 初始化行号
+     */
+    private initLineNumbers( data ) {
+        let result = new PagerList<T>( data, this.queryParam.page, this.queryParam.pageSize );
+        result.initLineNumbers();
+    }
+
+    /**
+     * 移除行
+     * @param ids 行标识列表
+     */
+    removeRows( ids?: string[] ) {
+        if ( !ids || ids.length === 0 )
+            ids = this.getChecked().map( value => value.id );
+        if ( !ids || ids.length === 0 ) {
+            util.message.warn( config.deleteNotSelected );
+            return null;
+        }
+        let result = util.helper.remove( this.dataSource, row => ids.findIndex( id => row.id === id ) > -1 );
+        this.dataSource = [...this.dataSource];
+        this.totalCount = this.totalCount - result.length;
+        this.initLineNumbers( this.dataSource );
+        this.checkedSelection.deselect( ...result );
+        return result;
     }
 }

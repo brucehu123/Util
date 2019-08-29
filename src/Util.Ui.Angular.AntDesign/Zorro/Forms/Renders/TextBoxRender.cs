@@ -31,13 +31,13 @@ namespace Util.Ui.Zorro.Forms.Renders {
         protected override TagBuilder GetTagBuilder() {
             ResolveExpression();
             var builder = CreateBuilder();
-            base.Config( builder );
+            Config( builder );
             ConfigTextArea( builder );
             ConfigDatePicker( builder );
             ConfigNumber( builder );
             ConfigTextBox( builder );
             ConfigStandalone( builder );
-            return builder;
+            return GetFormItemBuilder( builder );
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace Util.Ui.Zorro.Forms.Renders {
             if( _config.Contains( UiConst.For ) == false )
                 return;
             var expression = _config.GetValue<ModelExpression>( UiConst.For );
-            TextBoxExpressionResolver.Init( expression, _config );
+            TextBoxExpressionResolver.Init( expression, _config, IsTableEdit() );
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace Util.Ui.Zorro.Forms.Renders {
         /// </summary>
         private void ConfigType( TagBuilder builder ) {
             var type = _config.GetValue<TextBoxType?>( UiConst.Type );
-            if ( type == TextBoxType.Number )
+            if( type == TextBoxType.Number )
                 return;
             builder.AddAttribute( UiConst.Type, type?.Description() );
         }

@@ -14,10 +14,10 @@ import { MessageConfig } from '../config/message-config';
     selector: 'x-textarea',
     template:`
         <nz-form-control [nzValidateStatus]="(controlModel?.invalid && (controlModel?.dirty || controlModel.touched))?'error':'success'">
-            <textarea nz-input [name]="name" [placeholder]="placeholder" [disabled]="disabled" [readonly]="readonly"
+            <textarea nz-input [id]="rawId" [name]="name" [placeholder]="placeholder" [disabled]="disabled" [readonly]="readonly"
                    #control #controlModel="ngModel" [ngModel]="model" (ngModelChange)="onModelChange($event)"
                    [nzAutosize]="{ minRows: minRows, maxRows: maxRows }"
-                   (blur)="blur($event)" (focus)="focus($event)" (keyup)="keyup($event)" (keydown)="keydown($event)"
+                   (blur)="handleBlur($event)" (focus)="handleFocus($event)" (keyup)="handleKeyup($event)" (keydown)="handleKeydown($event)"
                    [required]="required" [minlength]="minLength" [maxlength]="maxLength"
             ></textarea>
             <nz-form-explain *ngIf="controlModel?.invalid && (controlModel?.dirty || controlModel.touched)">{{getErrorMessage()}}</nz-form-explain>

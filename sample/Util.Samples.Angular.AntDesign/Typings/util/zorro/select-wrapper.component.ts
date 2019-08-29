@@ -6,7 +6,8 @@ import { Component, Input, Output, EventEmitter, OnInit, Optional } from '@angul
 import { NgForm } from '@angular/forms';
 import { FormControlWrapperBase } from './base/form-control-wrapper-base';
 import { SelectList, SelectItem, SelectOption, SelectOptionGroup } from "../core/select-model";
-import { util, QueryParameter } from "../index";
+import { Util as util } from "../util";
+import { QueryParameter } from "../core/model";
 
 /**
  * NgZorro下拉列表包装器
@@ -17,10 +18,10 @@ import { util, QueryParameter } from "../index";
         <nz-form-control [nzValidateStatus]="(controlModel?.hasError( 'required' ) && (controlModel?.dirty || controlModel.touched))?'error':'success'">
             <nz-select #controlModel="ngModel" [name]="name" [ngModel]="model" (ngModelChange)="onModelChange($event)" 
                 [nzPlaceHolder]="placeholder" [ngStyle]="getStyle()" [nzLoading]="loading"
-                [nzMode]="multiple?'multiple':'default'" [nzMaxMultipleCount]="maxMultipleCount"
+                [nzMode]="getMode()" [nzMaxMultipleCount]="maxMultipleCount"
                 [nzShowSearch]="showSearch" [nzAllowClear]="allowClear" [nzShowArrow]="showArrow"
                 [nzDisabled]="disabled" [required]="required" [nzServerSearch]="isServerSearch"
-                (nzBlur)="blur($event)" (nzFocus)="focus($event)" (keyup)="keyup($event)" (keydown)="keydown($event)"
+                (nzBlur)="handleBlur($event)" (nzFocus)="handleFocus($event)" (keyup)="handleKeyup($event)" (keydown)="handleKeydown($event)"
                 (nzOnSearch)="search($event)" (nzScrollToBottom)="scrollToBottom()">
                 <nz-option *ngIf="defaultOptionText" [nzLabel]="defaultOptionText"></nz-option>
                 <ng-container *ngIf="!isGroup">
@@ -77,6 +78,10 @@ export class Select extends FormControlWrapperBase implements OnInit {
      */
     @Input() queryParam;
     /**
+     * 初始化时是否自动加载数据，默认为true,设置成false则手工加载
+     */
+    @Input() autoLoad: boolean;
+    /**
      * 排序列
      */
     @Input() order: string;
@@ -88,6 +93,10 @@ export class Select extends FormControlWrapperBase implements OnInit {
      * 多选
      */
     @Input() multiple: boolean;
+    /**
+     * 标签
+     */
+    @Input() tags: boolean;
     /**
      * 最多允许选中的数量
      */
@@ -134,6 +143,7 @@ export class Select extends FormControlWrapperBase implements OnInit {
         this.allowClear = true;
         this.showSearch = true;
         this.showArrow = true;
+        this.autoLoad = true;
         this.loading = false;
         this.maxMultipleCount = 9999;
     }
@@ -147,7 +157,8 @@ export class Select extends FormControlWrapperBase implements OnInit {
         this.loadData();
         if ( this.dataSource )
             return;
-        this.loadUrl();
+        if ( this.autoLoad )
+            this.loadUrl();
     }
 
     /**
@@ -231,6 +242,15 @@ export class Select extends FormControlWrapperBase implements OnInit {
         return {
             'width': this.width ? this.width : null
         };
+    }
+
+    /**
+     * 获取模式
+     */
+    getMode() {
+        if ( this.tags )
+            return 'tags';
+        return this.multiple ? 'multiple' : 'default';
     }
 
     /**

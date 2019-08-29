@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Razor.TagHelpers;
 using Util.Ui.Angular.AntDesign.Tests.XUnitHelpers;
 using Util.Ui.Configs;
+using Util.Ui.Enums;
 using Util.Ui.Zorro.Forms;
 using Xunit;
 using Xunit.Abstractions;
@@ -42,7 +43,7 @@ namespace Util.Ui.Angular.AntDesign.Tests.Zorro.Forms {
         [Fact]
         public void TestDefault() {
             var result = new String();
-            result.Append( "<form nz-form=\"\"></form>" );
+            result.Append( "<form autocomplete=\"off\" nz-form=\"\"></form>" );
             Assert.Equal( result.ToString(), GetResult() );
         }
 
@@ -53,7 +54,55 @@ namespace Util.Ui.Angular.AntDesign.Tests.Zorro.Forms {
         public void TestId() {
             var attributes = new TagHelperAttributeList { { UiConst.Id, "a" } };
             var result = new String();
-            result.Append( "<form #a=\"ngForm\" nz-form=\"\">" );
+            result.Append( "<form #a=\"ngForm\" autocomplete=\"off\" nz-form=\"\">" );
+            result.Append( "</form>" );
+            Assert.Equal( result.ToString(), GetResult( attributes ) );
+        }
+
+        /// <summary>
+        /// 测试布局
+        /// </summary>
+        [Fact]
+        public void TestLayout() {
+            var attributes = new TagHelperAttributeList { { UiConst.Layout, FormLayout.Inline } };
+            var result = new String();
+            result.Append( "<form autocomplete=\"off\" nz-form=\"\" nzLayout=\"inline\">" );
+            result.Append( "</form>" );
+            Assert.Equal( result.ToString(), GetResult( attributes ) );
+        }
+
+        /// <summary>
+        /// 测试显示标签冒号
+        /// </summary>
+        [Fact]
+        public void TestShowColon() {
+            var attributes = new TagHelperAttributeList { { UiConst.ShowColon, false } };
+            var result = new String();
+            result.Append( "<form autocomplete=\"off\" nz-form=\"\" [nzNoColon]=\"true\">" );
+            result.Append( "</form>" );
+            Assert.Equal( result.ToString(), GetResult( attributes ) );
+        }
+
+        /// <summary>
+        /// 测试自动完成打开
+        /// </summary>
+        [Fact]
+        public void TestAutoComplete_On() {
+            var attributes = new TagHelperAttributeList { { UiConst.AutoComplete, true } };
+            var result = new String();
+            result.Append( "<form autocomplete=\"on\" nz-form=\"\">" );
+            result.Append( "</form>" );
+            Assert.Equal( result.ToString(), GetResult( attributes ) );
+        }
+
+        /// <summary>
+        /// 测试自动完成关闭
+        /// </summary>
+        [Fact]
+        public void TestAutoComplete_Off() {
+            var attributes = new TagHelperAttributeList { { UiConst.AutoComplete, false } };
+            var result = new String();
+            result.Append( "<form autocomplete=\"off\" nz-form=\"\">" );
             result.Append( "</form>" );
             Assert.Equal( result.ToString(), GetResult( attributes ) );
         }
@@ -65,7 +114,7 @@ namespace Util.Ui.Angular.AntDesign.Tests.Zorro.Forms {
         public void TestOnSubmit() {
             var attributes = new TagHelperAttributeList { { UiConst.OnSubmit, "a" } };
             var result = new String();
-            result.Append( "<form (ngSubmit)=\"a\" nz-form=\"\">" );
+            result.Append( "<form (ngSubmit)=\"a\" autocomplete=\"off\" nz-form=\"\">" );
             result.Append( "</form>" );
             Assert.Equal( result.ToString(), GetResult( attributes ) );
         }

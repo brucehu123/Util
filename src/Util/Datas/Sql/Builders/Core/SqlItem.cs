@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
+using Util.Datas.Sql.Builders.Extensions;
 using Util.Datas.Sql.Matedatas;
 using Util.Helpers;
 
@@ -28,7 +30,8 @@ namespace Util.Datas.Sql.Builders.Core {
         /// <param name="alias">别名</param>
         /// <param name="raw">使用原始值</param>
         /// <param name="isSplit">是否用句点分割名称</param>
-        public SqlItem( string name, string prefix = null, string alias = null, bool raw = false, bool isSplit = true ) {
+        /// <param name="isResolve">是否解析名称</param>
+        public SqlItem( string name, string prefix = null, string alias = null, bool raw = false, bool isSplit = true, bool isResolve = true ) {
             if( string.IsNullOrWhiteSpace( name ) )
                 return;
             _prefix = prefix;
@@ -38,19 +41,29 @@ namespace Util.Datas.Sql.Builders.Core {
                 _name = name;
                 return;
             }
-            Resolve( name, isSplit );
+            Resolve( name, isSplit, isResolve );
         }
 
         /// <summary>
-        /// 设置别名，返回前缀和名称
+        /// 解析名称
         /// </summary>
-        private void Resolve( string name, bool isSplit ) {
-            var pattern = @"\s+[aA][sS]\s+";
-            var list = Regex.Split( name, pattern );
-            if( list == null || list.Length == 0 )
+        private void Resolve( string name, bool isSplit, bool isResolve ) {
+            name = name.Trim();
+            if( isResolve == false ) {
+                _name = name;
                 return;
-            if( list.Length == 2 )
-                _alias = list[1];
+            }
+            var pattern = @"\s+[aA][sS]\s+";
+            name = Regex.Replace( name, pattern, " " );
+            if( name.Contains( "." ) ) {
+                pattern = @"\s+.\s+";
+                name = Regex.Replace( name, pattern, "." );
+            }
+            var list = name.Split( ' ' ).Where( t => t.IsEmpty() == false ).ToList();
+            if( list.Count == 0 )
+                return;
+            if( list.Count == 2 )
+                _alias = list[1].Trim();
             if( isSplit ) {
                 SplitName( list[0] );
                 return;
@@ -106,21 +119,23 @@ namespace Util.Datas.Sql.Builders.Core {
         /// <summary>
         /// 获取Sql
         /// </summary>
-        public string ToSql( IDialect dialect = null, ITableDatabase tableDatabase = null ) {
+        public virtual string ToSql( IDialect dialect = null, ITableDatabase tableDatabase = null ) {
             if( string.IsNullOrWhiteSpace( Name ) )
                 return null;
             if( Raw )
                 return Name;
-            return string.IsNullOrWhiteSpace( Alias ) ? GetColumn( dialect, tableDatabase ) : $"{GetColumn( dialect, tableDatabase )} As {GetSafeName( dialect, Alias )}";
+            var column = GetColumn( dialect, tableDatabase );
+            var columnAlias = GetSafeName( dialect, Alias );
+            return dialect.GetColumn( column, columnAlias );
         }
 
         /// <summary>
         /// 获取列
         /// </summary>
-        private string GetColumn( IDialect dialect, ITableDatabase tableDatabase ) {
+        protected string GetColumn( IDialect dialect, ITableDatabase tableDatabase ) {
             var result = new StringBuilder();
             var database = DatabaseName;
-            if ( string.IsNullOrWhiteSpace( DatabaseName ) && tableDatabase != null )
+            if( string.IsNullOrWhiteSpace( DatabaseName ) && tableDatabase != null )
                 database = tableDatabase.GetDatabase( GetName() );
             if( string.IsNullOrWhiteSpace( database ) == false )
                 result.Append( $"{GetSafeName( dialect, database )}." );
@@ -133,8 +148,8 @@ namespace Util.Datas.Sql.Builders.Core {
         /// <summary>
         /// 获取名称
         /// </summary>
-        private string GetName() {
-            if ( string.IsNullOrWhiteSpace( Prefix ) )
+        protected string GetName() {
+            if( string.IsNullOrWhiteSpace( Prefix ) )
                 return Name;
             return $"{Prefix}.{Name}";
         }
@@ -142,10 +157,8 @@ namespace Util.Datas.Sql.Builders.Core {
         /// <summary>
         /// 获取安全名称
         /// </summary>
-        private string GetSafeName( IDialect dialect, string name ) {
-            if( dialect == null )
-                return name;
-            return dialect.SafeName( name );
+        protected string GetSafeName( IDialect dialect, string name ) {
+            return dialect.GetSafeName( name );
         }
     }
 }
