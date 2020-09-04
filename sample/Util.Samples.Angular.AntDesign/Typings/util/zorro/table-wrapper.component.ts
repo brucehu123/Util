@@ -167,7 +167,7 @@ export class Table<T extends IKey> implements OnInit {
         handler?: ( result ) => void;
     } ) {
         options = options || {};
-        let url = options.url || this.url || ( this.baseUrl && `/api/${this.baseUrl}` );
+        let url = options.url || this.url || util.helper.getUrl( this.baseUrl );
         if ( !url )
             return;
         let param = options.param || this.queryParam;
@@ -249,11 +249,11 @@ export class Table<T extends IKey> implements OnInit {
      * @param handler 刷新成功回调函数
      */
     refresh( queryParam, button?, handler?: ( result ) => void ) {
+        this.clear();
         this.queryParam = queryParam;
         this.queryParamChange.emit( queryParam );
         this.initPage();
         this.queryParam.order = this.sortKey;
-        this.checkedKeys = null;
         this.query( {
             button: button,
             handler: handler
@@ -297,7 +297,7 @@ export class Table<T extends IKey> implements OnInit {
      * 发送删除请求
      */
     private deleteRequest( button?, ids?: string, handler?: () => void, url?: string ) {
-        url = url || this.deleteUrl || ( this.baseUrl && `/api/${this.baseUrl}/delete` );
+        url = url || this.deleteUrl || util.helper.getUrl( this.baseUrl,"delete" );
         if ( !url ) {
             console.log( "表格deleteUrl未设置" );
             return;
@@ -403,8 +403,8 @@ export class Table<T extends IKey> implements OnInit {
     /**
      * 切换勾选状态
      */
-    toggleRow(row) {
-        this.checkedSelection.toggle(row);
+    toggleRow( row ) {
+        this.checkedSelection.toggle( row );
     }
 
     /**
@@ -434,6 +434,36 @@ export class Table<T extends IKey> implements OnInit {
     }
 
     /**
+     * 仅选中一行
+     */
+    selectRowOnly( row ) {
+        this.clearSelected();
+        this.selectRow( row );
+    }
+
+    /**
+     * 单击选中一行
+     */
+    selectRow( row ) {
+        this.selectedSelection.select( row );
+    }
+
+    /**
+     * 清空选中的行
+     */
+    clearSelected() {
+        this.selectedSelection.clear();
+    }
+
+    /**
+     * 是否被选中
+     * @param row 行
+     */
+    isSelected( row ) {
+        return this.selectedSelection.isSelected( row );
+    }
+
+    /**
      * 清理
      */
     clear() {
@@ -441,6 +471,7 @@ export class Table<T extends IKey> implements OnInit {
         this.queryParam.page = 1;
         this.totalCount = 0;
         this.checkedSelection.clear();
+        this.selectedSelection.clear();
         this.checkedKeys = null;
     }
 

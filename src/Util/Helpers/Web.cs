@@ -18,7 +18,7 @@ namespace Util.Helpers {
     /// <summary>
     /// Web操作
     /// </summary>
-    public static class Web {
+    public static partial class Web {
 
         #region 静态构造方法
 
@@ -92,6 +92,25 @@ namespace Util.Helpers {
                 if( User.Identity is ClaimsIdentity identity )
                     return identity;
                 return UnauthenticatedIdentity.Instance;
+            }
+        }
+
+        #endregion
+
+        #region AccessToken(获取访问令牌)
+
+        /// <summary>
+        /// 获取访问令牌
+        /// </summary>
+        public static string AccessToken {
+            get {
+                var authorization = Request?.Headers["Authorization"].SafeString();
+                if ( string.IsNullOrWhiteSpace( authorization ) )
+                    return null;
+                var list = authorization.Split( ' ' );
+                if ( list.Length == 2 )
+                    return list[1];
+                return null;
             }
         }
 

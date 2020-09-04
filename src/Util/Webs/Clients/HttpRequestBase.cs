@@ -361,9 +361,19 @@ namespace Util.Webs.Clients {
         /// </summary>
         /// <param name="client">Http客户端</param>
         protected virtual void InitHttpClient( HttpClient client ) {
+            InitToken();
             if ( string.IsNullOrWhiteSpace( _token ) )
                 return;
             client.SetBearerToken( _token );
+        }
+
+        /// <summary>
+        /// 初始化访问令牌
+        /// </summary>
+        protected virtual void InitToken() {
+            if( string.IsNullOrWhiteSpace( _token ) == false )
+                return;
+            _token = Web.AccessToken;
         }
 
         /// <summary>
@@ -447,6 +457,24 @@ namespace Util.Webs.Clients {
         protected virtual void FailHandler( string result, HttpStatusCode statusCode, string contentType ) {
             _failAction?.Invoke( result );
             _failStatusCodeAction?.Invoke( result, statusCode );
+        }
+
+        #endregion
+
+        #region GetStreamAsync(获取流)
+
+        /// <summary>
+        /// 获取流
+        /// </summary>
+        public async Task<byte[]> GetStreamAsync() {
+            using( var client = new HttpClient() ) {
+                using( var result = await client.GetAsync( _url ) ) {
+                    if( result.IsSuccessStatusCode ) {
+                        return await result.Content.ReadAsByteArrayAsync();
+                    }
+                }
+            }
+            return null;
         }
 
         #endregion
